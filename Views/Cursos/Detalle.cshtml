@@ -1,0 +1,67 @@
+@model GestiondeMatricula.Models.Curso
+
+@{
+    ViewData["Title"] = "Detalle del Curso";
+    var cupoDisponible = Model.CupoMaximo - Model.Matriculas.Count(m => m.Estado == EstadoMatricula.Confirmada);
+    var usuarioAutenticado = User.Identity?.IsAuthenticated == true;
+}
+
+<h2>@Model.Nombre</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Código:</dt>
+                    <dd class="col-sm-8">@Model.Codigo</dd>
+
+                    <dt class="col-sm-4">Nombre:</dt>
+                    <dd class="col-sm-8">@Model.Nombre</dd>
+
+                    <dt class="col-sm-4">Créditos:</dt>
+                    <dd class="col-sm-8">@Model.Creditos</dd>
+
+                    <dt class="col-sm-4">Horario:</dt>
+                    <dd class="col-sm-8">@Model.HorarioInicio.ToString(@"hh\:mm") - @Model.HorarioFin.ToString(@"hh\:mm")</dd>
+
+                    <dt class="col-sm-4">Cupo máximo:</dt>
+                    <dd class="col-sm-8">@Model.CupoMaximo</dd>
+
+                    <dt class="col-sm-4">Cupo disponible:</dt>
+                    <dd class="col-sm-8">
+                        <span class="@(cupoDisponible > 0 ? "text-success fw-bold" : "text-danger fw-bold")">
+                            @cupoDisponible
+                        </span>
+                    </dd>
+                </dl>
+
+                <div class="mt-4">
+                    @if (usuarioAutenticado)
+                    {
+                        <form method="post" action="@Url.Action("Inscribir", "Matriculas")">
+                            <input type="hidden" name="cursoId" value="@Model.Id" />
+                            <button type="submit" class="btn btn-primary btn-lg" 
+                                    @(cupoDisponible <= 0 ? "disabled" : "")>
+                                @(cupoDisponible <= 0 ? "Cupo Agotado" : "Inscribirse")
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <a href="@Url.Page("/Account/Login", new { area = "Identity", returnUrl = Context.Request.Path })" 
+                           class="btn btn-primary btn-lg">
+                            Iniciar sesión para inscribirse
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a href="@Url.Action("Catalogo")" class="btn btn-secondary">
+        ← Volver al catálogo
+    </a>
+</div>
