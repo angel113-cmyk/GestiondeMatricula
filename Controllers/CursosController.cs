@@ -17,37 +17,47 @@ namespace GestiondeMatricula.Controllers
 
         public async Task<IActionResult> Catalogo(CursoFiltroViewModel filtro)
         {
-            var query = _context.Cursos
+            // Obtener todos los cursos activos primero
+            var cursosQuery = _context.Cursos
                 .Include(c => c.Matriculas)
-                .Where(c => c.Activo);
+                .Where(c => c.Activo)
+                .AsQueryable();
 
-            // Aplicar filtros
+            // Aplicar filtros de manera segura
             if (!string.IsNullOrEmpty(filtro.Nombre))
             {
-                query = query.Where(c => c.Nombre.Contains(filtro.Nombre) || c.Codigo.Contains(filtro.Nombre));
+                // Convertir a minúsculas para búsqueda case-insensitive
+                var nombreLower = filtro.Nombre.ToLower();
+                cursosQuery = cursosQuery.Where(c => 
+                    c.Nombre.ToLower().Contains(nombreLower) || 
+                    c.Codigo.ToLower().Contains(nombreLower));
             }
 
             if (filtro.CreditosMin.HasValue)
             {
-                query = query.Where(c => c.Creditos >= filtro.CreditosMin.Value);
+                cursosQuery = cursosQuery.Where(c => c.Creditos >= filtro.CreditosMin.Value);
             }
 
             if (filtro.CreditosMax.HasValue)
             {
-                query = query.Where(c => c.Creditos <= filtro.CreditosMax.Value);
+                cursosQuery = cursosQuery.Where(c => c.Creditos <= filtro.CreditosMax.Value);
             }
 
+            // Para filtros de horario, ejecutar en memoria después de obtener datos
+            var cursos = await cursosQuery.OrderBy(c => c.Nombre).ToListAsync();
+
+            // Aplicar filtros de horario en memoria
             if (filtro.HorarioDesde.HasValue)
             {
-                query = query.Where(c => c.HorarioInicio >= filtro.HorarioDesde.Value);
+                cursos = cursos.Where(c => c.HorarioInicio >= filtro.HorarioDesde.Value).ToList();
             }
 
             if (filtro.HorarioHasta.HasValue)
             {
-                query = query.Where(c => c.HorarioFin <= filtro.HorarioHasta.Value);
+                cursos = cursos.Where(c => c.HorarioFin <= filtro.HorarioHasta.Value).ToList();
             }
 
-            filtro.Cursos = await query.OrderBy(c => c.Nombre).ToListAsync();
+            filtro.Cursos = cursos;
             return View(filtro);
         }
 
@@ -65,7 +75,7 @@ namespace GestiondeMatricula.Controllers
             return View(curso);
         }
 
-        // Validaciones server-side
+        // Validaciones server-side (simplificadas)
         [AcceptVerbs("GET", "POST")]
         public IActionResult VerifyCreditos(int creditos)
         {
