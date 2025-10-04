@@ -1,12 +1,12 @@
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
-using GestiondeMatricula.Data;
 using GestiondeMatricula.Models;
+using GestiondeMatricula.Data;
+using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 
 namespace GestiondeMatricula.Services
 {
-    public class CursoCacheService
+    public class CursoCacheService : ICursoCacheService
     {
         private readonly ApplicationDbContext _context;
         private readonly IDistributedCache _cache;
@@ -17,34 +17,43 @@ namespace GestiondeMatricula.Services
             _cache = cache;
         }
 
-        public async Task<List<Curso>> GetCursosCacheAsync()
+        // MÉTODO 1: Obtener cursos activos desde cache o base de datos
+        public async Task<List<Curso>> ObtenerCursosActivosCache()
         {
-            // Intentar obtener del cache
-            var cachedCursos = await _cache.GetStringAsync("cursos_activos");
-            if (cachedCursos != null)
+            var cacheKey = "cursos_activos_cache";
+            var cachedData = await _cache.GetStringAsync(cacheKey);
+            
+            if (!string.IsNullOrEmpty(cachedData))
             {
-                return JsonSerializer.Deserialize<List<Curso>>(cachedCursos);
+                return JsonSerializer.Deserialize<List<Curso>>(cachedData);
             }
 
-            // Si no está en cache, obtener de BD
-            var cursos = await _context.Cursos
-                .Include(c => c.Matriculas)
-                .Where(c => c.Activo)
-                .OrderBy(c => c.Nombre)
-                .ToListAsync();
-
-            // Guardar en cache por 60 segundos
+            // Si no está en cache, obtener de la base de datos
+            var cursos = await ObtenerCursosActivos();
+            
+            // Guardar en cache
             var options = new DistributedCacheEntryOptions()
-                .SetAbsoluteExpiration(TimeSpan.FromSeconds(60));
+                .SetSlidingExpiration(TimeSpan.FromMinutes(2));
                 
-            await _cache.SetStringAsync("cursos_activos", JsonSerializer.Serialize(cursos), options);
-
+            await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(cursos), options);
+            
             return cursos;
         }
 
-        public async Task ClearCacheAsync()
+        // MÉTODO 2: Obtener todos los cursos (sin filtro de estado)
+        public async Task<List<Curso>> ObtenerCursosActivos()
         {
-            await _cache.RemoveAsync("cursos_activos");
+            // Como no tienes propiedad Estado, obtenemos todos los cursos
+            return await _context.Cursos.ToListAsync();
         }
+
+        // MÉTODO 3: Invalidar el cache
+        public async Task InvalidarCache()
+        {
+            var cacheKey = "cursos_activos_cache";
+            await _cache.RemoveAsync(cacheKey);
+        }
+
+        // SI LA INTERFAZ TIENE MÁS MÉTODOS, IMPLEMENTA TODOS AQUÍ
     }
 }

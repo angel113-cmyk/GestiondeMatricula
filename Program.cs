@@ -18,7 +18,7 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
 builder.Services.AddControllersWithViews();
 
 // ✅ REGISTRAR SERVICIOS DE CACHE
-builder.Services.AddScoped<CursoCacheService>();
+builder.Services.AddScoped<ICursoCacheService, CursoCacheService>();
 
 // ✅ AGREGAR LOGGING PARA DEBUG
 builder.Services.AddLogging();
