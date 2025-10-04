@@ -1,0 +1,67 @@
+@{
+    ViewData["Title"] = "Reportes";
+}
+
+<div class="container">
+    <h1>Reportes del Sistema</h1>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total de Cursos</h5>
+                    <p class="card-text display-4">@ViewBag.TotalCursos</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Cursos Activos</h5>
+                    <p class="card-text display-4">@ViewBag.CursosActivos</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-info mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Matrículas</h5>
+                    <p class="card-text display-4">@ViewBag.TotalMatriculas</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Estadísticas de Matrículas</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Confirmadas:</strong> @ViewBag.MatriculasConfirmadas</p>
+                    <p><strong>Pendientes:</strong> @ViewBag.MatriculasPendientes</p>
+                    <p><strong>Canceladas:</strong> @ViewBag.MatriculasCanceladas</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Top Cursos Más Solicitados</h5>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.TopCursos != null)
+                    {
+                        foreach (var curso in ViewBag.TopCursos)
+                        {
+                            <p>@curso.Nombre - @curso.MatriculasCount matrículas</p>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <a href="@Url.Action("Index")" class="btn btn-secondary mt-3">Volver al Panel</a>
+</div>

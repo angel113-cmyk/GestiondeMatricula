@@ -81,7 +81,7 @@ namespace GestiondeMatricula.Controllers
             return View(curso);
         }
 
-        // ✅ NUEVO: Acción para obtener el último curso visitado (API)
+
         public IActionResult ObtenerUltimoCursoVisitado()
         {
             var ultimoCurso = HttpContext.Session.GetString("UltimoCursoVisitado");

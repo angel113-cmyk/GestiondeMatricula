@@ -1,0 +1,37 @@
+
+@{
+    ViewData["Title"] = "Panel de Coordinador";
+}
+
+<div class="container">
+    <h1>Panel de Coordinador</h1>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Gestión de Cursos</h5>
+                    <p class="card-text">Crear, editar y desactivar cursos</p>
+                    <a href="@Url.Action("Cursos")" class="btn btn-primary">Administrar Cursos</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Matrículas</h5>
+                    <p class="card-text">Ver y gestionar matrículas por curso</p>
+                    <a href="@Url.Action("Matriculas")" class="btn btn-primary">Ver Matrículas</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Reportes</h5>
+                    <p class="card-text">Estadísticas del sistema</p>
+                    <a href="@Url.Action("Reportes")" class="btn btn-primary">Ver Reportes</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

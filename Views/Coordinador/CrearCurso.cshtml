@@ -1,0 +1,65 @@
+@model Curso
+@{
+    ViewData["Title"] = "Crear Curso";
+}
+
+<div class="container">
+    <h1>Crear Nuevo Curso</h1>
+
+    <form asp-action="CrearCurso" method="post">
+        <div class="form-group">
+            <label asp-for="Codigo" class="control-label"></label>
+            <input asp-for="Codigo" class="form-control" />
+            <span asp-validation-for="Codigo" class="text-danger"></span>
+        </div>
+        
+        <div class="form-group">
+            <label asp-for="Nombre" class="control-label"></label>
+            <input asp-for="Nombre" class="form-control" />
+            <span asp-validation-for="Nombre" class="text-danger"></span>
+        </div>
+        
+        <div class="form-group">
+            <label asp-for="Creditos" class="control-label"></label>
+            <input asp-for="Creditos" class="form-control" />
+            <span asp-validation-for="Creditos" class="text-danger"></span>
+        </div>
+        
+        <div class="form-group">
+            <label asp-for="CupoMaximo" class="control-label"></label>
+            <input asp-for="CupoMaximo" class="form-control" />
+            <span asp-validation-for="CupoMaximo" class="text-danger"></span>
+        </div>
+        
+        <div class="form-group">
+            <label asp-for="HorarioInicio" class="control-label"></label>
+            @if (typeof(Curso).GetProperty("HorarioInicio").PropertyType == typeof(TimeSpan))
+            {
+                <input asp-for="HorarioInicio" type="time" class="form-control" />
+            }
+            else
+            {
+                <input asp-for="HorarioInicio" type="datetime-local" class="form-control" />
+            }
+            <span asp-validation-for="HorarioInicio" class="text-danger"></span>
+        </div>
+        
+        <div class="form-group">
+            <label asp-for="HorarioFin" class="control-label"></label>
+            @if (typeof(Curso).GetProperty("HorarioFin").PropertyType == typeof(TimeSpan))
+            {
+                <input asp-for="HorarioFin" type="time" class="form-control" />
+            }
+            else
+            {
+                <input asp-for="HorarioFin" type="datetime-local" class="form-control" />
+            }
+            <span asp-validation-for="HorarioFin" class="text-danger"></span>
+        </div>
+        
+        <div class="form-group mt-3">
+            <button type="submit" class="btn btn-success">Crear Curso</button>
+            <a href="@Url.Action("Cursos")" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>

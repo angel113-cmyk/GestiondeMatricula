@@ -1,0 +1,77 @@
+
+@model IEnumerable<Curso>
+@{
+    ViewData["Title"] = "Gestión de Cursos";
+}
+
+<div class="container">
+    <h1>Gestión de Cursos</h1>
+    
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    <div class="mb-3">
+        <a href="@Url.Action("CrearCurso")" class="btn btn-success">Crear Nuevo Curso</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Nombre</th>
+                    <th>Créditos</th>
+                    <th>Cupo</th>
+                    <th>Horario</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var curso in Model)
+                {
+                    <tr>
+                        <td>@curso.Codigo</td>
+                        <td>@curso.Nombre</td>
+                        <td>@curso.Creditos</td>
+                        <td>@curso.CupoMaximo</td>
+                        <!-- Views/Coordinador/Cursos.cshtml -->
+                        <td>@curso.HorarioInicio.ToString(@"hh\:mm") - @curso.HorarioFin.ToString(@"hh\:mm")</td>
+                        <td>
+                            @if (curso.Activo)
+                            {
+                                <span class="badge bg-success">Activo</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Inactivo</span>
+                            }
+                        </td>
+                        <td>
+                            <a href="@Url.Action("EditarCurso", new { id = curso.Id })" class="btn btn-sm btn-primary">Editar</a>
+                            
+                            @if (curso.Activo)
+                            {
+                                <form method="post" action="@Url.Action("DesactivarCurso", new { id = curso.Id })" style="display:inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('¿Desactivar este curso?')">Desactivar</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <form method="post" action="@Url.Action("ActivarCurso", new { id = curso.Id })" style="display:inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('¿Activar este curso?')">Activar</button>
+                                </form>
+                            }
+                            
+                            <a href="@Url.Action("MatriculasPorCurso", new { cursoId = curso.Id })" class="btn btn-sm btn-info">Matrículas</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
