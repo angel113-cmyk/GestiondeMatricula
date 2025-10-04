@@ -1,0 +1,57 @@
+@model IEnumerable<Curso>
+@{
+    ViewData["Title"] = "Matrículas por Curso";
+}
+
+<div class="container">
+    <h1>Matrículas por Curso</h1>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Nombre</th>
+                    <th>Créditos</th>
+                    <th>Cupo Máximo</th>
+                    <th>Matrículas Confirmadas</th>
+                    <th>Matrículas Pendientes</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var curso in Model)
+                {
+                    var matriculasConfirmadas = curso.Matriculas?.Count(m => m.Estado == EstadoMatricula.Confirmada) ?? 0;
+                    var matriculasPendientes = curso.Matriculas?.Count(m => m.Estado == EstadoMatricula.Pendiente) ?? 0;
+                    
+                    <tr>
+                        <td>@curso.Codigo</td>
+                        <td>@curso.Nombre</td>
+                        <td>@curso.Creditos</td>
+                        <td>@curso.CupoMaximo</td>
+                        <td>
+                            <span class="@(matriculasConfirmadas >= curso.CupoMaximo ? "text-danger" : "text-success")">
+                                @matriculasConfirmadas
+                            </span>
+                        </td>
+                        <td>@matriculasPendientes</td>
+                        <td>
+                            <a href="@Url.Action("MatriculasPorCurso", new { cursoId = curso.Id })" 
+                               class="btn btn-sm btn-info">
+                                Ver Matrículas
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <a href="@Url.Action("Index")" class="btn btn-secondary">Volver al Panel</a>
+</div>

@@ -57,7 +57,57 @@ else
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// ✅ CONFIGURACIÓN DE ROLES Y USUARIO COORDINADOR
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    
+    string[] roleNames = { "Coordinador" };
+    foreach (var roleName in roleNames)
+    {
+        var roleExist = await roleManager.RoleExistsAsync(roleName);
+        if (!roleExist)
+        {
+            await roleManager.CreateAsync(new IdentityRole(roleName));
+        }
+    }
+
+   
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+    var coordinadorEmail = "coordinador@universidad.edu";
+
+    var coordinadorUser = await userManager.FindByEmailAsync(coordinadorEmail);
+    if (coordinadorUser == null)
+    {
+        coordinadorUser = new IdentityUser { 
+            UserName = coordinadorEmail, 
+            Email = coordinadorEmail,
+            EmailConfirmed = true // ✅ Importante para poder loguearse
+        };
+        var result = await userManager.CreateAsync(coordinadorUser, "Coordinador123!");
+        
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(coordinadorUser, "Coordinador");
+            Console.WriteLine("✅ Usuario coordinador creado exitosamente");
+        }
+        else
+        {
+            Console.WriteLine($"❌ Error creando usuario coordinador: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+        }
+    }
+    else
+    {
+        
+        if (!await userManager.IsInRoleAsync(coordinadorUser, "Coordinador"))
+        {
+            await userManager.AddToRoleAsync(coordinadorUser, "Coordinador");
+        }
+        Console.WriteLine("✅ Usuario coordinador ya existe");
+    }
+}
+
+
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
@@ -65,18 +115,18 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles(); // ✅ AGREGAR ESTO
+app.UseStaticFiles(); 
 app.UseRouting();
 app.UseSession();
-app.UseAuthentication(); // ✅ AGREGAR ESTO (IMPORTANTE)
+app.UseAuthentication(); 
 app.UseAuthorization();
 
-// ✅ AGREGAR INICIALIZACIÓN DE DATOS
+
 try
 {
     using var scope = app.Services.CreateScope();

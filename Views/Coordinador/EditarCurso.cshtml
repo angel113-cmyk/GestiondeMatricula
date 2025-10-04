@@ -1,0 +1,64 @@
+@model Curso
+@{
+    ViewData["Title"] = "Editar Curso";
+}
+
+<div class="container">
+    <h1>Editar Curso</h1>
+
+    <form asp-action="EditarCurso" method="post">
+        <input type="hidden" asp-for="Id" />
+        
+        <div class="form-group mb-3">
+            <label asp-for="Codigo" class="control-label"></label>
+            <input asp-for="Codigo" class="form-control" />
+            <span asp-validation-for="Codigo" class="text-danger"></span>
+        </div>
+        
+        <div class="form-group mb-3">
+            <label asp-for="Nombre" class="control-label"></label>
+            <input asp-for="Nombre" class="form-control" />
+            <span asp-validation-for="Nombre" class="text-danger"></span>
+        </div>
+        
+        <div class="form-group mb-3">
+            <label asp-for="Creditos" class="control-label"></label>
+            <input asp-for="Creditos" class="form-control" type="number" min="1" />
+            <span asp-validation-for="Creditos" class="text-danger"></span>
+        </div>
+        
+        <div class="form-group mb-3">
+            <label asp-for="CupoMaximo" class="control-label"></label>
+            <input asp-for="CupoMaximo" class="form-control" type="number" min="1" />
+            <span asp-validation-for="CupoMaximo" class="text-danger"></span>
+        </div>
+        
+        <div class="form-group mb-3">
+            <label asp-for="HorarioInicio" class="control-label"></label>
+            <input asp-for="HorarioInicio" type="time" class="form-control" 
+                   value="@Model.HorarioInicio.ToString(@"hh\:mm")" />
+            <span asp-validation-for="HorarioInicio" class="text-danger"></span>
+        </div>
+        
+        <div class="form-group mb-3">
+            <label asp-for="HorarioFin" class="control-label"></label>
+            <input asp-for="HorarioFin" type="time" class="form-control" 
+                   value="@Model.HorarioFin.ToString(@"hh\:mm")" />
+            <span asp-validation-for="HorarioFin" class="text-danger"></span>
+        </div>
+        
+        <div class="form-group form-check mb-3">
+            <input asp-for="Activo" class="form-check-input" />
+            <label asp-for="Activo" class="form-check-label">Curso Activo</label>
+        </div>
+        
+        <div class="form-group mt-4">
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            <a href="@Url.Action("Cursos")" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
