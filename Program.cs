@@ -6,7 +6,10 @@ using GestiondeMatricula.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+//var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+//builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+
+
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(connectionString));
@@ -17,25 +20,25 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
 
-// ✅ REGISTRAR SERVICIOS DE CACHE
+
 builder.Services.AddScoped<ICursoCacheService, CursoCacheService>();
 
-// ✅ AGREGAR LOGGING PARA DEBUG
+
 builder.Services.AddLogging();
 
-// ✅ CONFIGURAR REDIS PARA SESSION Y CACHE
+
 var redisConnection = builder.Configuration.GetConnectionString("RedisConnection");
 
 if (!string.IsNullOrEmpty(redisConnection))
 {
-    // Configurar Redis Cache
+    
     builder.Services.AddStackExchangeRedisCache(options =>
     {
         options.Configuration = redisConnection;
         options.InstanceName = "GestionMatriculas_";
     });
 
-    // Configurar Session con Redis
+    
     builder.Services.AddSession(options =>
     {
         options.Cookie.HttpOnly = true;
@@ -45,7 +48,7 @@ if (!string.IsNullOrEmpty(redisConnection))
 }
 else
 {
-    // Fallback a memoria si Redis no está configurado
+    
     builder.Services.AddDistributedMemoryCache();
     builder.Services.AddSession(options =>
     {
@@ -57,7 +60,7 @@ else
 
 var app = builder.Build();
 
-// ✅ CONFIGURACIÓN DE ROLES Y USUARIO COORDINADOR
+
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
@@ -82,7 +85,7 @@ using (var scope = app.Services.CreateScope())
         coordinadorUser = new IdentityUser { 
             UserName = coordinadorEmail, 
             Email = coordinadorEmail,
-            EmailConfirmed = true // ✅ Importante para poder loguearse
+            EmailConfirmed = true 
         };
         var result = await userManager.CreateAsync(coordinadorUser, "Coordinador123!");
         
