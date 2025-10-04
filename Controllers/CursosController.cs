@@ -3,66 +3,66 @@ using Microsoft.EntityFrameworkCore;
 using GestiondeMatricula.Data;
 using GestiondeMatricula.ViewModels;
 using GestiondeMatricula.Models;
+using GestiondeMatricula.Services;
 
 namespace GestiondeMatricula.Controllers
 {
     public class CursosController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly ICursoCacheService _cacheService;
+        private readonly ILogger<CursosController> _logger;
 
-        public CursosController(ApplicationDbContext context)
+        public CursosController(ApplicationDbContext context, ICursoCacheService cacheService, ILogger<CursosController> logger)
         {
             _context = context;
+            _cacheService = cacheService;
+            _logger = logger;
         }
 
         public async Task<IActionResult> Catalogo(CursoFiltroViewModel filtro)
         {
-            // Obtener todos los cursos activos primero
-            var cursosQuery = _context.Cursos
-                .Include(c => c.Matriculas)
-                .Where(c => c.Activo)
-                .AsQueryable();
+            // ✅ USAR CACHE para obtener cursos
+            var cursos = await _cacheService.ObtenerCursosActivosCache();
 
-            // Aplicar filtros de manera segura
+            // Aplicar filtros en memoria
+            var cursosFiltrados = cursos.AsQueryable();
+
             if (!string.IsNullOrEmpty(filtro.Nombre))
             {
-                // Convertir a minúsculas para búsqueda case-insensitive
                 var nombreLower = filtro.Nombre.ToLower();
-                cursosQuery = cursosQuery.Where(c => 
+                cursosFiltrados = cursosFiltrados.Where(c => 
                     c.Nombre.ToLower().Contains(nombreLower) || 
                     c.Codigo.ToLower().Contains(nombreLower));
             }
 
             if (filtro.CreditosMin.HasValue)
             {
-                cursosQuery = cursosQuery.Where(c => c.Creditos >= filtro.CreditosMin.Value);
+                cursosFiltrados = cursosFiltrados.Where(c => c.Creditos >= filtro.CreditosMin.Value);
             }
 
             if (filtro.CreditosMax.HasValue)
             {
-                cursosQuery = cursosQuery.Where(c => c.Creditos <= filtro.CreditosMax.Value);
+                cursosFiltrados = cursosFiltrados.Where(c => c.Creditos <= filtro.CreditosMax.Value);
             }
 
-            // Para filtros de horario, ejecutar en memoria después de obtener datos
-            var cursos = await cursosQuery.OrderBy(c => c.Nombre).ToListAsync();
-
-            // Aplicar filtros de horario en memoria
             if (filtro.HorarioDesde.HasValue)
             {
-                cursos = cursos.Where(c => c.HorarioInicio >= filtro.HorarioDesde.Value).ToList();
+                cursosFiltrados = cursosFiltrados.Where(c => c.HorarioInicio >= filtro.HorarioDesde.Value);
             }
 
             if (filtro.HorarioHasta.HasValue)
             {
-                cursos = cursos.Where(c => c.HorarioFin <= filtro.HorarioHasta.Value).ToList();
+                cursosFiltrados = cursosFiltrados.Where(c => c.HorarioFin <= filtro.HorarioHasta.Value);
             }
 
-            filtro.Cursos = cursos;
+            filtro.Cursos = cursosFiltrados.ToList();
             return View(filtro);
         }
 
         public async Task<IActionResult> Detalle(int id)
         {
+            // ✅ GUARDAR EN SESSION el último curso visitado
             var curso = await _context.Cursos
                 .Include(c => c.Matriculas)
                 .FirstOrDefaultAsync(c => c.Id == id && c.Activo);
@@ -72,28 +72,32 @@ namespace GestiondeMatricula.Controllers
                 return NotFound();
             }
 
+            // Guardar en session
+            HttpContext.Session.SetString("UltimoCursoVisitado", curso.Nombre);
+            HttpContext.Session.SetInt32("UltimoCursoId", curso.Id);
+
+            _logger.LogInformation($"✅ Session UPDATED - Último curso: {curso.Nombre}");
+
             return View(curso);
         }
 
-        // Validaciones server-side (simplificadas)
-        [AcceptVerbs("GET", "POST")]
-        public IActionResult VerifyCreditos(int creditos)
+        // ✅ NUEVO: Acción para obtener el último curso visitado (API)
+        public IActionResult ObtenerUltimoCursoVisitado()
         {
-            if (creditos <= 0)
-            {
-                return Json("Los créditos deben ser mayores a 0.");
-            }
-            return Json(true);
-        }
+            var ultimoCurso = HttpContext.Session.GetString("UltimoCursoVisitado");
+            var ultimoCursoId = HttpContext.Session.GetInt32("UltimoCursoId");
 
-        [AcceptVerbs("GET", "POST")]
-        public IActionResult VerifyHorario(TimeSpan horarioInicio, TimeSpan horarioFin)
-        {
-            if (horarioInicio >= horarioFin)
+            if (string.IsNullOrEmpty(ultimoCurso))
             {
-                return Json("El horario de inicio debe ser anterior al horario de fin.");
+                return Json(new { existe = false });
             }
-            return Json(true);
+
+            return Json(new { 
+                existe = true,
+                nombre = ultimoCurso,
+                id = ultimoCursoId,
+                url = Url.Action("Detalle", "Cursos", new { id = ultimoCursoId })
+            });
         }
     }
 }
