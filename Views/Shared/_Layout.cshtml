@@ -37,6 +37,15 @@
                 </div>
             </div>
         </nav>
+        <div id="ultimoCursoContainer" class="container" style="display: none;">
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                <strong>📚 Último curso visitado:</strong> 
+                <span id="ultimoCursoNombre"></span>
+                <a id="ultimoCursoLink" href="#" class="alert-link">Volver al curso</a>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+
     </header>
     <div class="container">
         <main role="main" class="pb-3">
@@ -55,3 +64,18 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
+<script>
+    // Cargar último curso visitado al cargar la página
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('@Url.Action("GetUltimoCurso", "Cursos")')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('ultimoCursoNombre').textContent = data.nombre;
+                    document.getElementById('ultimoCursoLink').href = data.url;
+                    document.getElementById('ultimoCursoAlert').style.display = 'block';
+                }
+            });
+    });
+</script>

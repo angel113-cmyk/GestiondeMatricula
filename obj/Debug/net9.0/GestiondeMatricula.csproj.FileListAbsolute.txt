@@ -292,3 +292,6 @@ C:\Users\User\Downloads\GestiondeMatricula\obj\Debug\net9.0\refint\GestiondeMatr
 C:\Users\User\Downloads\GestiondeMatricula\obj\Debug\net9.0\GestiondeMatricula.pdb
 C:\Users\User\Downloads\GestiondeMatricula\obj\Debug\net9.0\GestiondeMatricula.genruntimeconfig.cache
 C:\Users\User\Downloads\GestiondeMatricula\obj\Debug\net9.0\ref\GestiondeMatricula.dll
+C:\Users\User\Downloads\GestiondeMatricula\bin\Debug\net9.0\Microsoft.Extensions.Caching.StackExchangeRedis.dll
+C:\Users\User\Downloads\GestiondeMatricula\bin\Debug\net9.0\Pipelines.Sockets.Unofficial.dll
+C:\Users\User\Downloads\GestiondeMatricula\bin\Debug\net9.0\StackExchange.Redis.dll

@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using GestiondeMatricula.Data;
+using GestiondeMatricula.Services;
+using GestiondeMatricula.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +16,44 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
     .AddRoles<IdentityRole>() // ✅ AGREGAR ESTO
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
+
+// ✅ REGISTRAR SERVICIOS DE CACHE
+builder.Services.AddScoped<CursoCacheService>();
+
+// ✅ AGREGAR LOGGING PARA DEBUG
+builder.Services.AddLogging();
+
+// ✅ CONFIGURAR REDIS PARA SESSION Y CACHE
+var redisConnection = builder.Configuration.GetConnectionString("RedisConnection");
+
+if (!string.IsNullOrEmpty(redisConnection))
+{
+    // Configurar Redis Cache
+    builder.Services.AddStackExchangeRedisCache(options =>
+    {
+        options.Configuration = redisConnection;
+        options.InstanceName = "GestionMatriculas_";
+    });
+
+    // Configurar Session con Redis
+    builder.Services.AddSession(options =>
+    {
+        options.Cookie.HttpOnly = true;
+        options.Cookie.IsEssential = true;
+        options.IdleTimeout = TimeSpan.FromMinutes(2);
+    });
+}
+else
+{
+    // Fallback a memoria si Redis no está configurado
+    builder.Services.AddDistributedMemoryCache();
+    builder.Services.AddSession(options =>
+    {
+        options.Cookie.HttpOnly = true;
+        options.Cookie.IsEssential = true;
+        options.IdleTimeout = TimeSpan.FromMinutes(2);
+    });
+}
 
 var app = builder.Build();
 
@@ -32,7 +72,7 @@ else
 app.UseHttpsRedirection();
 app.UseStaticFiles(); // ✅ AGREGAR ESTO
 app.UseRouting();
-
+app.UseSession();
 app.UseAuthentication(); // ✅ AGREGAR ESTO (IMPORTANTE)
 app.UseAuthorization();
 
