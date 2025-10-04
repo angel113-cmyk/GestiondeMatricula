@@ -4,79 +4,85 @@
     ViewData["Title"] = "Mis Matrículas";
 }
 
-<h2>Mis Matrículas</h2>
+<div class="container mt-5">
+    <div class="bg-blur shadow p-4">
+        <h2 class="mb-4 text-center">🎓 Mis Matrículas</h2>
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success">@TempData["Success"]</div>
-}
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
 
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger">@TempData["Error"]</div>
-}
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">@TempData["Error"]</div>
+        }
 
-@if (Model.Any())
-{
-    <div class="table-responsive">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Curso</th>
-                    <th>Código</th>
-                    <th>Fecha de Registro</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var matricula in Model)
-                {
-                    <tr>
-                        <td>@matricula.Curso.Nombre</td>
-                        <td>@matricula.Curso.Codigo</td>
-                        <td>@matricula.FechaRegistro.ToString("dd/MM/yyyy HH:mm")</td>
-                        <td>
-                            <span class="badge @GetBadgeClass(matricula.Estado)">
-                                @matricula.Estado
-                            </span>
-                        </td>
-                        <td>
-                            @if (matricula.Estado == GestiondeMatricula.Models.EstadoMatricula.Pendiente)
-                            {
-                                <form method="post" action="@Url.Action("Cancelar", new { id = matricula.Id })" class="d-inline">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-sm btn-warning" 
-                                            onclick="return confirm('¿Está seguro de cancelar esta matrícula?')">
-                                        Cancelar
-                                    </button>
-                                </form>
-                            }
-                            <a href="@Url.Action("Detalle", "Cursos", new { id = matricula.CursoId })" 
-                               class="btn btn-sm btn-info">Ver Curso</a>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Curso</th>
+                            <th>Código</th>
+                            <th>Fecha de Registro</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var matricula in Model)
+                        {
+                            <tr>
+                                <td>@matricula.Curso.Nombre</td>
+                                <td>@matricula.Curso.Codigo</td>
+                                <td>@matricula.FechaRegistro.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    <span class="badge @GetBadgeClass(matricula.Estado)">
+                                        @matricula.Estado
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (matricula.Estado == GestiondeMatricula.Models.EstadoMatricula.Pendiente)
+                                    {
+                                        <form method="post" action="@Url.Action("Cancelar", new { id = matricula.Id })" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-warning"
+                                                    onclick="return confirm('¿Está seguro de cancelar esta matrícula?')">
+                                                Cancelar
+                                            </button>
+                                        </form>
+                                    }
+                                    <a href="@Url.Action("Detalle", "Cursos", new { id = matricula.CursoId })"
+                                       class="btn btn-sm btn-info">Ver Curso</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info text-center">
+                No tienes matrículas registradas.<br>
+                <a href="@Url.Action("Catalogo", "Cursos")" class="alert-link">Explora nuestros cursos</a>
+            </div>
+        }
+
+        <div class="mt-4 text-center">
+            <a href="@Url.Action("Catalogo", "Cursos")" class="btn btn-primary px-4">Volver al Catálogo</a>
+        </div>
     </div>
-}
-else
-{
-    <div class="alert alert-info">
-        No tienes matrículas registradas.
-        <a href="@Url.Action("Catalogo", "Cursos")" class="alert-link">Explora nuestros cursos</a>
-    </div>
-}
-
-<a href="@Url.Action("Catalogo", "Cursos")" class="btn btn-primary">Volver al Catálogo</a>
+</div>
 
 @functions {
     string GetBadgeClass(GestiondeMatricula.Models.EstadoMatricula estado)
     {
         return estado switch
         {
-            GestiondeMatricula.Models.EstadoMatricula.Pendiente => "bg-warning",
+            GestiondeMatricula.Models.EstadoMatricula.Pendiente => "bg-warning text-dark",
             GestiondeMatricula.Models.EstadoMatricula.Confirmada => "bg-success",
             GestiondeMatricula.Models.EstadoMatricula.Cancelada => "bg-secondary",
             _ => "bg-secondary"

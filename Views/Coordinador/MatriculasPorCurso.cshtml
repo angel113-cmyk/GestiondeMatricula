@@ -1,78 +1,81 @@
-<!-- Views/Coordinador/MatriculasPorCurso.cshtml -->
 @model IEnumerable<Matricula>
 @{
     ViewData["Title"] = "Matrículas del Curso";
     var curso = ViewBag.Curso as Curso;
 }
 
-<div class="container">
-    <h1>Matrículas del Curso: @curso.Nombre</h1>
-    <h4>Código: @curso.Codigo - Cupo: @curso.CupoMaximo</h4>
+<div class="container mt-5">
+    <div class="bg-blur shadow">
+        <h2 class="mb-3 text-center">📋 Matrículas del Curso: @curso.Nombre</h2>
+        <h5 class="mb-4 text-center text-muted">Código: @curso.Codigo &nbsp;|&nbsp; Cupo: @curso.CupoMaximo</h5>
 
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success">@TempData["Success"]</div>
-    }
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger">@TempData["Error"]</div>
-    }
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">@TempData["Error"]</div>
+        }
 
-    <div class="table-responsive">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Estudiante</th>
-                    <th>Fecha Registro</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var matricula in Model)
-                {
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-dark">
                     <tr>
-                        <td>@matricula.Usuario.Email</td>
-                        <td>@matricula.FechaRegistro.ToString("dd/MM/yyyy HH:mm")</td>
-                        <td>
-                            @switch (matricula.Estado)
-                            {
-                                case EstadoMatricula.Pendiente:
-                                    <span class="badge bg-warning">Pendiente</span>
-                                    break;
-                                case EstadoMatricula.Confirmada:
-                                    <span class="badge bg-success">Confirmada</span>
-                                    break;
-                                case EstadoMatricula.Cancelada:
-                                    <span class="badge bg-danger">Cancelada</span>
-                                    break;
-                            }
-                        </td>
-                        <td>
-                            @if (matricula.Estado == EstadoMatricula.Pendiente)
-                            {
-                                <form method="post" action="@Url.Action("ConfirmarMatricula", new { id = matricula.Id })" style="display:inline">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('¿Confirmar esta matrícula?')">Confirmar</button>
-                                </form>
-                                <form method="post" action="@Url.Action("CancelarMatricula", new { id = matricula.Id })" style="display:inline">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Cancelar esta matrícula?')">Cancelar</button>
-                                </form>
-                            }
-                            else if (matricula.Estado == EstadoMatricula.Confirmada)
-                            {
-                                <form method="post" action="@Url.Action("CancelarMatricula", new { id = matricula.Id })" style="display:inline">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Cancelar esta matrícula?')">Cancelar</button>
-                                </form>
-                            }
-                        </td>
+                        <th>Estudiante</th>
+                        <th>Fecha Registro</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
                     </tr>
-                }
-            </tbody>
-        </table>
-    </div>
+                </thead>
+                <tbody>
+                    @foreach (var matricula in Model)
+                    {
+                        <tr>
+                            <td>@matricula.Usuario.Email</td>
+                            <td>@matricula.FechaRegistro.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                @switch (matricula.Estado)
+                                {
+                                    case EstadoMatricula.Pendiente:
+                                        <span class="badge bg-warning text-dark">Pendiente</span>
+                                        break;
+                                    case EstadoMatricula.Confirmada:
+                                        <span class="badge bg-success">Confirmada</span>
+                                        break;
+                                    case EstadoMatricula.Cancelada:
+                                        <span class="badge bg-danger">Cancelada</span>
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                @if (matricula.Estado == EstadoMatricula.Pendiente)
+                                {
+                                    <form method="post" action="@Url.Action("ConfirmarMatricula", new { id = matricula.Id })" style="display:inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('¿Confirmar esta matrícula?')">Confirmar</button>
+                                    </form>
+                                    <form method="post" action="@Url.Action("CancelarMatricula", new { id = matricula.Id })" style="display:inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Cancelar esta matrícula?')">Cancelar</button>
+                                    </form>
+                                }
+                                else if (matricula.Estado == EstadoMatricula.Confirmada)
+                                {
+                                    <form method="post" action="@Url.Action("CancelarMatricula", new { id = matricula.Id })" style="display:inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Cancelar esta matrícula?')">Cancelar</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
 
-    <a href="@Url.Action("Matriculas")" class="btn btn-secondary">Volver a Matrículas</a>
+        <div class="mt-3 text-center">
+            <a href="@Url.Action("Matriculas")" class="btn btn-secondary">Volver a Matrículas</a>
+        </div>
+    </div>
 </div>

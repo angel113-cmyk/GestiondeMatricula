@@ -25,7 +25,7 @@ namespace GestiondeMatricula.Controllers
             try
             {
                 Console.WriteLine($"🔍 Inscribir llamado - cursoId: {cursoId}");
-                
+
                 var usuario = await _userManager.GetUserAsync(User);
                 if (usuario == null)
                 {
@@ -101,6 +101,35 @@ namespace GestiondeMatricula.Controllers
                 .ToListAsync();
 
             return View(matriculas);
+        }
+        
+        
+        public async Task<IActionResult> Cancelar(int id)
+        {
+            var matricula = await _context.Matriculas
+                .Include(m => m.Curso)
+                .FirstOrDefaultAsync(m => m.Id == id && m.UsuarioId == _userManager.GetUserId(User));
+
+            if (matricula == null)
+            {
+                return NotFound();
+            }
+
+            // Solo permitir cancelar matrículas pendientes o confirmadas
+            if (matricula.Estado == EstadoMatricula.Pendiente || matricula.Estado == EstadoMatricula.Confirmada)
+            {
+                matricula.Estado = EstadoMatricula.Cancelada;
+                _context.Update(matricula);
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = "Matrícula cancelada exitosamente";
+            }
+            else
+            {
+                TempData["Error"] = "No se puede cancelar esta matrícula";
+            }
+
+            return RedirectToAction(nameof(MisMatriculas));
         }
     }
 }

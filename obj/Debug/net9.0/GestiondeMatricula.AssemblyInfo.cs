@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("GestiondeMatricula")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+19c1118768ee8c2c693d602c8e8a6e28454aacd3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7507b230c30ea3346d4d249fae0e65783fa191b5")]
 [assembly: System.Reflection.AssemblyProductAttribute("GestiondeMatricula")]
 [assembly: System.Reflection.AssemblyTitleAttribute("GestiondeMatricula")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
