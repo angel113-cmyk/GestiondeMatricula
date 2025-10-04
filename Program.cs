@@ -11,6 +11,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
+    .AddRoles<IdentityRole>() // ✅ AGREGAR ESTO
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
 
@@ -29,11 +30,29 @@ else
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles(); // ✅ AGREGAR ESTO
 app.UseRouting();
 
+app.UseAuthentication(); // ✅ AGREGAR ESTO (IMPORTANTE)
 app.UseAuthorization();
 
-app.MapStaticAssets();
+// ✅ AGREGAR INICIALIZACIÓN DE DATOS
+try
+{
+    using var scope = app.Services.CreateScope();
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<ApplicationDbContext>();
+    var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    
+    Console.WriteLine("🚀 INICIANDO DbInitializer...");
+    await DbInitializer.Initialize(context, userManager, roleManager);
+    Console.WriteLine("✅ DbInitializer COMPLETADO");
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"❌ ERROR en DbInitializer: {ex.Message}");
+}
 
 app.MapControllerRoute(
     name: "default",
@@ -42,16 +61,5 @@ app.MapControllerRoute(
 
 app.MapRazorPages()
    .WithStaticAssets();
-
-// Inicializar datos usando DbInitializer
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    var context = services.GetRequiredService<ApplicationDbContext>();
-    var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
-    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-
-    await DbInitializer.Initialize(context, userManager, roleManager);
-}
 
 app.Run();

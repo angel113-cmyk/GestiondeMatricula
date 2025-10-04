@@ -1,0 +1,74 @@
+@model GestiondeMatricula.ViewModels.CursoFiltroViewModel
+
+@{
+    ViewData["Title"] = "Catálogo de Cursos";
+}
+
+<h2>Catálogo de Cursos</h2>
+
+<!-- Formulario de Filtros -->
+<form method="get" class="mb-4 p-3 border rounded bg-light">
+    <div class="row g-3 align-items-end">
+        <div class="col-md-3">
+            <label asp-for="Nombre" class="form-label"></label>
+            <input asp-for="Nombre" class="form-control" placeholder="Buscar por nombre o código...">
+        </div>
+        <div class="col-md-2">
+            <label asp-for="CreditosMin" class="form-label"></label>
+            <input asp-for="CreditosMin" class="form-control" min="1" max="10">
+        </div>
+        <div class="col-md-2">
+            <label asp-for="CreditosMax" class="form-label"></label>
+            <input asp-for="CreditosMax" class="form-control" min="1" max="10">
+        </div>
+        <div class="col-md-2">
+            <label asp-for="HorarioDesde" class="form-label"></label>
+            <input asp-for="HorarioDesde" class="form-control" type="time">
+        </div>
+        <div class="col-md-2">
+            <label asp-for="HorarioHasta" class="form-label"></label>
+            <input asp-for="HorarioHasta" class="form-control" type="time">
+        </div>
+        <div class="col-md-1">
+            <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+            <a href="@Url.Action("Catalogo")" class="btn btn-secondary w-100 mt-1">Limpiar</a>
+        </div>
+    </div>
+</form>
+
+<!-- Lista de Cursos -->
+@if (Model.Cursos.Any())
+{
+    <div class="row">
+        @foreach (var curso in Model.Cursos)
+        {
+            var cupoDisponible = curso.CupoMaximo - curso.Matriculas.Count(m => m.Estado == EstadoMatricula.Confirmada);
+            
+            <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">@curso.Nombre</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">Código: @curso.Codigo</h6>
+                        <p class="card-text">
+                            <strong>Créditos:</strong> @curso.Creditos<br>
+                            <strong>Horario:</strong> @curso.HorarioInicio.ToString(@"hh\:mm") - @curso.HorarioFin.ToString(@"hh\:mm")<br>
+                            <strong>Cupo disponible:</strong> 
+                            <span class="@(cupoDisponible > 0 ? "text-success" : "text-danger")">
+                                @cupoDisponible / @curso.CupoMaximo
+                            </span>
+                        </p>
+                    </div>
+                    <div class="card-footer">
+                        <a href="@Url.Action("Detalle", new { id = curso.Id })" class="btn btn-success">Ver Detalles</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="alert alert-info text-center">
+        No se encontraron cursos con los filtros aplicados.
+    </div>
+}
